@@ -30,6 +30,7 @@ const Video: React.FC<Props> = ({ url }) => {
       height="100%"
       style={{ objectFit: "contain", display: "block" }}
       src={`${import.meta.env.VITE_API_URL}/${url}`}
+      poster="/bbb.jpg"
       playsInline
       preload="auto"
       loop

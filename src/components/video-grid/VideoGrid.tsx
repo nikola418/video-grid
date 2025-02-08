@@ -47,34 +47,38 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
           >
             {({ onItemsRendered, ref }) => {
               return (
-                <FixedSizeGrid
-                  ref={ref}
-                  onItemsRendered={(props) => {
-                    return onItemsRendered({
-                      overscanStartIndex: 1,
-                      overscanStopIndex: 1,
-                      visibleStartIndex: props.visibleRowStartIndex,
-                      visibleStopIndex: props.visibleRowStopIndex,
-                    });
-                  }}
-                  columnCount={3}
-                  rowCount={6}
-                  columnWidth={400}
-                  rowHeight={400}
-                  height={height}
-                  width={width}
-                >
-                  {({ columnIndex, rowIndex, style }) => {
-                    const videoIndex = rowIndex * 3 + columnIndex;
-                    if (videoIndex >= videoInfos.length) return null;
+                <div>
+                  <FixedSizeGrid
+                    ref={ref}
+                    onItemsRendered={(props) => {
+                      return onItemsRendered({
+                        overscanStartIndex: props.overscanRowStartIndex,
+                        overscanStopIndex: props.overscanRowStopIndex,
+                        visibleStartIndex: props.visibleRowStartIndex,
+                        visibleStopIndex: props.visibleRowStopIndex,
+                      });
+                    }}
+                    columnCount={4}
+                    rowCount={
+                      videoInfos.length === 0 ? 4 : videoInfos.length / 3
+                    }
+                    columnWidth={1920 / 4}
+                    rowHeight={400}
+                    height={height}
+                    width={width}
+                  >
+                    {({ columnIndex, rowIndex, style }) => {
+                      const videoIndex = rowIndex * 3 + columnIndex;
+                      if (videoIndex >= videoInfos.length) return null;
 
-                    return (
-                      <div style={style}>
-                        <VideoCard info={videoInfos[videoIndex]} />
-                      </div>
-                    );
-                  }}
-                </FixedSizeGrid>
+                      return (
+                        <div style={{ ...style, padding: "24px" }}>
+                          <VideoCard info={videoInfos[videoIndex]} />
+                        </div>
+                      );
+                    }}
+                  </FixedSizeGrid>
+                </div>
               );
             }}
           </InfiniteLoader>
