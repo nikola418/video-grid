@@ -29,13 +29,13 @@ const Video: React.FC<Props> = ({ url }) => {
       width="100%"
       height="100%"
       style={{ objectFit: "contain", display: "block" }}
-      src={url}
+      preload="none"
       poster="/bbb.jpg"
       playsInline
-      preload="auto"
       loop
       muted
     >
+      <source src={url} type="video/mp4" />
       Your browser does not support the video tag.
     </video>
   );
