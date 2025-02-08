@@ -1,6 +1,6 @@
 import { getAll, VideoInfo } from "@/api/video-infos";
 import { useElementOnScreen } from "@/hooks";
-import { debounce, merge, unionBy } from "lodash";
+import { debounce, unionBy } from "lodash";
 import { useEffect, useState } from "react";
 import { VideoCard } from "./video-card";
 import styles from "./VideoGrid.module.css";
