@@ -3,6 +3,10 @@
 - server: `pnpm run json-server`
 - frontend: `pnpm run dev`
 
+## Wireframe:
+
+[Figma](https://www.figma.com/design/nR0kuO9quRNCmcEe9I9o97/Video-Grid-Wireframe?node-id=0-1&t=mHTg5wr5R8KPrYWT-1)
+
 ## Tech Stack:
 
 - server: **json-server** - Lightweight server for mocking backend functionality
