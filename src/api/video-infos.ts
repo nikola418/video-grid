@@ -22,7 +22,14 @@ export const getAll = async ({
 }): Promise<VideoInfo[]> => {
   const { data } = await axios.get<VideoInfo[]>(
     `${import.meta.env.VITE_API_URL}/video-infos`,
-    { params: { _start: start, _end: stop, title: search, category } }
+    {
+      params: {
+        _start: start,
+        _end: stop,
+        title: search === "" ? undefined : search,
+        category: category === "" ? undefined : category,
+      },
+    }
   );
 
   return data;
