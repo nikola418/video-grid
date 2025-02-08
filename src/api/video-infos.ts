@@ -10,19 +10,19 @@ export type VideoInfo = {
 };
 
 export const getAll = async ({
-  page,
-  limit,
+  start,
+  stop,
   search,
   category,
 }: {
-  page?: number;
-  limit?: number;
+  start?: number;
+  stop?: number;
   search?: string;
   category?: string;
 }): Promise<VideoInfo[]> => {
   const { data } = await axios.get<VideoInfo[]>(
     `${import.meta.env.VITE_API_URL}/video-infos`,
-    { params: { _page: page, _limit: limit, title: search, category } }
+    { params: { _start: start, _end: stop, title: search, category } }
   );
 
   return data;

@@ -1,11 +1,10 @@
 import { getAll, VideoInfo } from "@/api/video-infos";
-import { useElementOnScreen } from "@/hooks";
-import { debounce, isEmpty, unionBy } from "lodash";
-import { useEffect, useState } from "react";
+import { unionBy } from "lodash";
+import { Fragment, useCallback, useState } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { FixedSizeGrid } from "react-window";
+import InfiniteLoader from "react-window-infinite-loader";
 import { VideoCard } from "./video-card";
-import styles from "./VideoGrid.module.css";
-
-const limit = 4;
 
 type Props = {
   search?: string;
@@ -13,74 +12,75 @@ type Props = {
 };
 
 const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState(false);
   const [videoInfos, setVideoInfos] = useState<VideoInfo[]>([]);
-  const [containerRef, isVisible] = useElementOnScreen({
-    root: null,
-    rootMargin: "0px",
-    threshold: 1.0,
-  });
 
-  useEffect(() => {
-    const getVideoInfos = async () => {
-      setIsLoading(true);
+  const getVideoInfos = useCallback(
+    async (start: number, stop: number) => {
+      try {
+        const data = await getAll({
+          start,
+          stop,
+          search,
+          category: selectedCategory,
+        });
+        setVideoInfos((prev) =>
+          unionBy(prev, data, "id").sort((a, b) => a.createdAt - b.createdAt)
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    },
 
-      const debounced = debounce(async () => {
-        try {
-          const data = await getAll({
-            page,
-            limit,
-            search,
-            category: selectedCategory,
-          });
-          setVideoInfos((prev) =>
-            unionBy(prev, data, "id").sort((a, b) => a.createdAt - b.createdAt)
-          );
-          if (!isEmpty(data)) {
-            setHasMore(true);
-          } else {
-            setHasMore(false);
-          }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsLoading(false);
-        }
-      }, 1000);
-      debounced();
-    };
-
-    getVideoInfos();
-  }, [page, search, selectedCategory]);
-
-  useEffect(() => {
-    //* Optimistic
-    setVideoInfos([]);
-    setPage(1);
-  }, [search, selectedCategory]);
-
-  useEffect(() => {
-    if (isVisible && hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  }, [hasMore, isVisible]);
+    [search, selectedCategory]
+  );
 
   return (
-    <div>
-      <div className={styles.grid}>
-        {videoInfos?.map((info, i) => {
-          return <VideoCard key={i} info={info} />;
-        })}
-      </div>
-      {isLoading === true && (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <p>Loading ...</p>
-        </div>
-      )}
-      <div ref={containerRef}></div>
-    </div>
+    <Fragment>
+      <AutoSizer>
+        {({ height, width }) => (
+          <InfiniteLoader
+            itemCount={1000}
+            isItemLoaded={(index) => index < videoInfos.length}
+            loadMoreItems={async (startIndex, stopIndex) => {
+              await getVideoInfos(startIndex, stopIndex);
+            }}
+          >
+            {({ onItemsRendered, ref }) => {
+              return (
+                <FixedSizeGrid
+                  ref={ref}
+                  onItemsRendered={(props) => {
+                    return onItemsRendered({
+                      overscanStartIndex: 1,
+                      overscanStopIndex: 1,
+                      visibleStartIndex: props.visibleRowStartIndex,
+                      visibleStopIndex: props.visibleRowStopIndex,
+                    });
+                  }}
+                  columnCount={3}
+                  rowCount={6}
+                  columnWidth={400}
+                  rowHeight={400}
+                  height={height}
+                  width={width}
+                >
+                  {({ columnIndex, rowIndex, style }) => {
+                    const videoIndex = rowIndex * 3 + columnIndex;
+                    if (videoIndex >= videoInfos.length) return null;
+
+                    return (
+                      <div style={style}>
+                        <VideoCard info={videoInfos[videoIndex]} />
+                      </div>
+                    );
+                  }}
+                </FixedSizeGrid>
+              );
+            }}
+          </InfiniteLoader>
+        )}
+      </AutoSizer>
+    </Fragment>
   );
 };
 
