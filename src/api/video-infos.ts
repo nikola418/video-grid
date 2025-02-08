@@ -9,30 +9,20 @@ export type VideoInfo = {
   updatedAt: number;
 };
 
-type PaginatedResponse<T> = {
-  first: number;
-  prev: number | null;
-  next: number | null;
-  last: number;
-  pages: number;
-  items: number;
-  data: T[];
-};
-
 export const getAll = async ({
   page,
-  perPage,
+  limit,
   search,
   category,
 }: {
   page?: number;
-  perPage?: number;
+  limit?: number;
   search?: string;
   category?: string;
-}): Promise<PaginatedResponse<VideoInfo>> => {
-  const { data } = await axios.get<PaginatedResponse<VideoInfo>>(
+}): Promise<VideoInfo[]> => {
+  const { data } = await axios.get<VideoInfo[]>(
     `${import.meta.env.VITE_API_URL}/video-infos`,
-    { params: { _page: page, _per_page: perPage, title: search, category } }
+    { params: { _page: page, _limit: limit, title: search, category } }
   );
 
   return data;

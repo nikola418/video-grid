@@ -3,7 +3,7 @@ import { useState } from "react";
 import styles from "./Home.module.css";
 
 const Home = () => {
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState<string>();
 
   return (

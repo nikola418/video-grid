@@ -5,7 +5,7 @@ import styles from "./Navbar.module.css";
 import { Select } from "../select";
 
 type Props = {
-  search: string;
+  search?: string;
   setSearch: (value: string) => void;
   selectedCategory?: string;
   setSelectedCategory: (value: string) => void;

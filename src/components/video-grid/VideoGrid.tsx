@@ -1,14 +1,14 @@
 import { getAll, VideoInfo } from "@/api/video-infos";
 import { useElementOnScreen } from "@/hooks";
-import { debounce, unionBy } from "lodash";
+import { debounce, isEmpty, unionBy } from "lodash";
 import { useEffect, useState } from "react";
 import { VideoCard } from "./video-card";
 import styles from "./VideoGrid.module.css";
 
-const perPage = 4;
+const limit = 4;
 
 type Props = {
-  search: string;
+  search?: string;
   selectedCategory?: string;
 };
 
@@ -29,16 +29,16 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
 
       const debounced = debounce(async () => {
         try {
-          const { data, next } = await getAll({
+          const data = await getAll({
             page,
-            perPage,
+            limit,
             search,
             category: selectedCategory,
           });
           setVideoInfos((prev) =>
             unionBy(prev, data, "id").sort((a, b) => a.createdAt - b.createdAt)
           );
-          if (next !== null) {
+          if (!isEmpty(data)) {
             setHasMore(true);
           } else {
             setHasMore(false);

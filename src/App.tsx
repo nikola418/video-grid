@@ -1,4 +1,4 @@
-import Home from "./pages/Home";
+import { Home } from "./pages/home";
 
 //* Add routing and context providers as needed
 const App = () => {
