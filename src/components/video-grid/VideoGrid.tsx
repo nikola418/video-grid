@@ -59,7 +59,7 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
                       });
                     }}
                     columnCount={4}
-                    rowCount={50}
+                    rowCount={64 / 4}
                     columnWidth={width / 4}
                     rowHeight={height / 3}
                     height={height}
