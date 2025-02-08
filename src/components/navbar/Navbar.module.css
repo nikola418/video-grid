@@ -1,0 +1,15 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 80px;
+  width: 100%;
+  padding: var(--sm-padding);
+  background-color: aliceblue;
+  box-shadow: 0px 0px 5px #888;
+}
+
+.button {
+  color: black;
+}

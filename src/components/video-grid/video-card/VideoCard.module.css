@@ -1,0 +1,20 @@
+.videoCard {
+  display: flex;
+  flex-direction: column;
+  background-color: cadetblue;
+}
+
+.video {
+  flex: 1 auto;
+  overflow: hidden;
+}
+
+.tagline {
+  padding: 0 var(--sm-padding);
+}
+
+.info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
