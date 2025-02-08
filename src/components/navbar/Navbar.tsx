@@ -8,7 +8,7 @@ type Props = {
   search?: string;
   setSearch: (value: string) => void;
   selectedCategory?: string;
-  setSelectedCategory: (value: string) => void;
+  setSelectedCategory: (value?: string) => void;
 };
 
 const Navbar: React.FC<Props> = ({
@@ -54,10 +54,7 @@ const Navbar: React.FC<Props> = ({
       {selectedCategory === undefined ? (
         <button className={styles.button}>&#xf0b0;</button>
       ) : (
-        <button
-          className={styles.button}
-          onClick={() => setSelectedCategory("")}
-        >
+        <button className={styles.button} onClick={() => setSelectedCategory()}>
           x
         </button>
       )}
