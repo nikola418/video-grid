@@ -51,7 +51,7 @@ const Navbar: React.FC<Props> = ({
           </option>
         ))}
       </Select>
-      {selectedCategory === "" ? (
+      {selectedCategory === undefined ? (
         <button className={styles.button}>&#xf0b0;</button>
       ) : (
         <button
