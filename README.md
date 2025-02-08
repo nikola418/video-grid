@@ -23,5 +23,8 @@
 
 ## Future Improvements & Trade-Offs:
 
-- Currently all videos are loaded as a whole - this may pose an issue with a large number of videos (Data deduplication with, caching and clearing the said cache when scrolled far past the video should be considered to lighten the memory load)
+- Currently all videos are loaded as a whole - this may pose an issue with a large number of videos (Data deduplication with caching and clearing the said cache when scrolled far past the video should be considered to lighten the memory load)
 - Prop drilling - Currently shared states are drilled into children, this isn't a problem for small apps, but ContextProviders and store solutions are the way to go for anything that isn't trivial
+- NotFound, Error pages
+- Loading indicators
+- Filtering is done naively, it is not robust enough to provide consistent state management
