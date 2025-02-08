@@ -12,6 +12,9 @@ const Video: React.FC<Props> = ({ videoRef, url }) => {
       style={{ objectFit: "contain", display: "block" }}
       playsInline
       src={url}
+      onLoad={(e) => {
+        console.log("loading");
+      }}
       loop
       muted
     >

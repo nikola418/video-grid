@@ -40,8 +40,11 @@ const Navbar: React.FC<Props> = ({
       <Select
         value={selectedCategory}
         onChange={(e) => setSelectedCategory(e.target.value)}
+        defaultValue={"category"}
       >
-        <option selected>Category</option>
+        <option value="category" hidden>
+          Category
+        </option>
         {categories?.map((category) => (
           <option key={category.id} value={category.slug}>
             {category.name}
