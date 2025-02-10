@@ -4,8 +4,6 @@ import { Video } from "./video";
 
 type Props = {
   isLoading: () => boolean;
-  width: number;
-  height: number;
   video: VideoType;
   style: React.HTMLAttributes<HTMLDivElement>["style"];
 };
@@ -24,9 +22,10 @@ const VideoCard: React.FC<Props> = ({ style, video }) => {
     >
       <div className={styles.video}>
         <Video video={video} />
-        <p style={{ position: "absolute", bottom: 0, paddingLeft: 12 }}>
-          {video.duration}s
-        </p>
+        <div className={`row justify-content-space-between ${styles.tagline}`}>
+          <p style={{ margin: "6px" }}>Title</p>
+          <p style={{ margin: "6px" }}>{video.duration}s</p>
+        </div>
       </div>
     </div>
   );
