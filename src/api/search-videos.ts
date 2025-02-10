@@ -2,7 +2,7 @@ import axios from "axios";
 import { PaginationParams, Videos } from "pexels";
 
 type Params = {
-  query: string;
+  query?: string;
 } & PaginationParams;
 
 export const getAll = async (params: Params): Promise<Videos> => {

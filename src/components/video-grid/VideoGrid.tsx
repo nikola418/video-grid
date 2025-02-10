@@ -7,7 +7,6 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import { VideoCard } from "./video-card";
-import { Spinner } from "../spinner";
 
 type Props = {
   search?: string;
@@ -133,8 +132,6 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
                       return (
                         <VideoCard
                           style={style}
-                          width={width}
-                          height={height}
                           isLoading={() => !isItemLoaded(videoIndex)}
                           video={videoInfos[videoIndex]}
                         />

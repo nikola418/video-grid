@@ -4,21 +4,19 @@ import { Video } from "./video";
 
 type Props = {
   isLoading: () => boolean;
-  width: number;
-  height: number;
   video: VideoType;
   style: React.HTMLAttributes<HTMLDivElement>["style"];
 };
 
-const VideoCard: React.FC<Props> = ({ style, width, height, video }) => {
+const VideoCard: React.FC<Props> = ({ style, video }) => {
   return (
     <div
       style={{
         ...style,
-        left: style.left + 48,
-        top: style.top + 48,
-        width: style.width - 96,
-        height: style.height - 96,
+        left: (style?.left as number) + 48,
+        top: (style?.left as number) + 48,
+        width: (style?.width as number) - 96,
+        height: (style?.width as number) - 96,
       }}
       className={styles.videoCard}
     >
