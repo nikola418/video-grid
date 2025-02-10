@@ -25,7 +25,7 @@ const Video: React.FC<Props> = ({ video }) => {
         setIsVideoLoading(false);
         setIsVideoLoaded(true);
       }}
-      onMouseEnter={async () => {
+      onPointerEnter={async () => {
         if (videoRef.current && videoRef.current.paused) {
           try {
             await videoRef.current.play();
@@ -34,7 +34,7 @@ const Video: React.FC<Props> = ({ video }) => {
           }
         }
       }}
-      onMouseLeave={() => {
+      onPointerLeave={() => {
         if (videoRef.current && !videoRef.current.paused) {
           videoRef.current.pause();
           videoRef.current.currentTime = 0;
