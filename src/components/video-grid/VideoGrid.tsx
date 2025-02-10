@@ -80,7 +80,7 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
     setVideoInfos([]);
   }, [search, selectedCategory]);
 
-  const itemCount = hasNext ? videoInfos.length + 1 : videoInfos.length;
+  const itemCount = hasNext ? videoInfos.length + perPage : videoInfos.length;
   const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
 
   return (
@@ -128,11 +128,11 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
                   >
                     {({ columnIndex, rowIndex, style }) => {
                       const videoIndex = rowIndex * 4 + columnIndex;
-                      if (videoIndex >= videoInfos.length) return null;
+
                       return (
                         <VideoCard
                           style={style}
-                          isLoading={() => !isItemLoaded(videoIndex)}
+                          isItemLoaded={isItemLoaded(videoIndex)}
                           video={videoInfos[videoIndex]}
                         />
                       );
