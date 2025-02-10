@@ -9,10 +9,10 @@ const Home = () => {
   return (
     <div className={styles.page}>
       <Navbar
-        search={search}
-        setSearch={setSearch}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        search={search}
+        setSearch={setSearch}
       />
       <main className={styles.main}>
         <VideoGrid search={search} selectedCategory={selectedCategory} />

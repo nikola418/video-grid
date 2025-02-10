@@ -1,55 +1,88 @@
-import { getAll, VideoInfo } from "@/api/video-infos";
-import { unionBy } from "lodash";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { getAll as popularAll } from "@/api/popular-videos";
+import { getAll as searchAll } from "@/api/search-videos";
+import { debounce, DebouncedFunc, unionBy } from "lodash";
+import { Video as VideoType } from "pexels";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import { VideoCard } from "./video-card";
+import { Spinner } from "../spinner";
 
 type Props = {
   search?: string;
   selectedCategory?: string;
 };
 
-const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
-  const [videoInfos, setVideoInfos] = useState<VideoInfo[]>([]);
+const perPage = 12;
+
+const columnCount = (width: number) =>
+  width < 768 ? 1 : width < 1024 ? 2 : width < 1480 ? 3 : 4;
+const columnWidth = (width: number) =>
+  width < 768
+    ? width
+    : width < 1024
+    ? width / 2
+    : width < 1480
+    ? width / 3
+    : width / 4;
+
+const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
+  const [videoInfos, setVideoInfos] = useState<VideoType[]>([]);
+  const [page, setPage] = useState<number>(1);
   const [hasNext, setHasNext] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const lastDebounced = useRef<DebouncedFunc<() => Promise<void>> | null>(null);
 
   const getVideoInfos = useCallback(
-    async (start: number, stop: number) => {
+    async (perPage: number) => {
       setIsLoading(true);
-      try {
-        const data = await getAll({
-          start,
-          stop,
-          search,
-          category: selectedCategory,
-        });
-        setVideoInfos((prev) =>
-          unionBy(prev, data, "id").sort((a, b) => a.createdAt - b.createdAt)
-        );
-        if (data.length !== 0) setHasNext(true);
-        else setHasNext(false);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
+      const debounced = debounce(async () => {
+        const isSearch = search !== undefined && search !== "";
+        const isCategory =
+          selectedCategory !== undefined && selectedCategory !== "";
+
+        try {
+          const { videos, next_page } =
+            isSearch || isCategory
+              ? await searchAll({
+                  query: selectedCategory ?? search,
+                  page,
+                  per_page: perPage,
+                })
+              : await popularAll({
+                  page,
+                  per_page: perPage,
+                });
+
+          setVideoInfos((prev) => unionBy(prev, videos, "id"));
+
+          if (next_page) setHasNext(true);
+          else setHasNext(false);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 500);
+      lastDebounced.current?.cancel();
+      lastDebounced.current = debounced;
+      debounced();
     },
 
-    [search, selectedCategory]
+    [page, search, selectedCategory]
   );
 
   useEffect(() => {
-    getVideoInfos(0, 12);
+    getVideoInfos(perPage);
   }, [getVideoInfos]);
 
   useEffect(() => {
     setVideoInfos([]);
   }, [search, selectedCategory]);
 
-  const itemCount = hasNext ? videoInfos.length + 12 : videoInfos.length;
+  const itemCount = hasNext ? videoInfos.length + 1 : videoInfos.length;
+  const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
 
   return (
     <Fragment>
@@ -57,12 +90,12 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
         {({ height, width }) => (
           <InfiniteLoader
             itemCount={itemCount}
-            isItemLoaded={(index) => !hasNext || index < videoInfos.length}
+            isItemLoaded={isItemLoaded}
             loadMoreItems={
               isLoading
                 ? () => {}
-                : async (startIndex, stopIndex) => {
-                    await getVideoInfos(startIndex, stopIndex);
+                : () => {
+                    setPage((prev) => prev + 1);
                   }
             }
           >
@@ -87,39 +120,24 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
                           props.visibleColumnStopIndex,
                       })
                     }
-                    columnCount={
-                      width < 768 ? 1 : width < 1024 ? 2 : width < 1480 ? 3 : 4
-                    }
+                    columnCount={columnCount(width)}
                     rowCount={itemCount / 4}
-                    columnWidth={
-                      width < 768
-                        ? width
-                        : width < 1024
-                        ? width / 2
-                        : width < 1480
-                        ? width / 3
-                        : width / 4
-                    }
-                    rowHeight={300}
+                    columnWidth={columnWidth(width)}
+                    rowHeight={320}
                     height={height}
                     width={width}
                   >
                     {({ columnIndex, rowIndex, style }) => {
                       const videoIndex = rowIndex * 4 + columnIndex;
                       if (videoIndex >= videoInfos.length) return null;
-
                       return (
-                        <div
-                          style={{
-                            ...style,
-                            left: style.left + 12,
-                            top: style.top + 12,
-                            width: style.width - 24,
-                            height: style.height - 24,
-                          }}
-                        >
-                          <VideoCard info={videoInfos[videoIndex]} />
-                        </div>
+                        <VideoCard
+                          style={style}
+                          width={width}
+                          height={height}
+                          isLoading={() => !isItemLoaded(videoIndex)}
+                          video={videoInfos[videoIndex]}
+                        />
                       );
                     }}
                   </FixedSizeGrid>
@@ -129,7 +147,6 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
           </InfiniteLoader>
         )}
       </AutoSizer>
-      {isLoading === true && <div>Loading ...</div>}
     </Fragment>
   );
 };

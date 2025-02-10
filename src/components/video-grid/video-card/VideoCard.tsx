@@ -1,19 +1,32 @@
-import { VideoInfo } from "@/api/video-infos";
-import { Video } from "./video";
+import { Video as VideoType } from "pexels";
 import styles from "./VideoCard.module.css";
+import { Video } from "./video";
 
 type Props = {
-  info: VideoInfo;
+  isLoading: () => boolean;
+  width: number;
+  height: number;
+  video: VideoType;
+  style: React.HTMLAttributes<HTMLDivElement>["style"];
 };
 
-const VideoCard: React.FC<Props> = ({ info }) => {
+const VideoCard: React.FC<Props> = ({ style, width, height, video }) => {
   return (
-    <div className={styles.videoCard}>
+    <div
+      style={{
+        ...style,
+        left: style.left + 48,
+        top: style.top + 48,
+        width: style.width - 96,
+        height: style.height - 96,
+      }}
+      className={styles.videoCard}
+    >
       <div className={styles.video}>
-        <Video url={info.url} />
-        <div className={styles.tagline}>
-          <h4>{info.title}</h4>
-        </div>
+        <Video video={video} />
+        <p style={{ position: "absolute", bottom: 0, paddingLeft: 12 }}>
+          {video.duration}s
+        </p>
       </div>
     </div>
   );

@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.box {
+  cursor: pointer;
+  padding: var(--sm-padding);
+  margin: var(--xs-padding);
+  width: 200px;
+  border-radius: var(--sm-border-radius);
+  border: 1px solid #d5d6f846;
+  transition: 300ms background-color ease-in-out;
+}
+
+.box:hover {
+  background-color: rgba(86, 132, 147, 0.641);
+  border: 1px solid #d5d6f846;
+}
+
+.box.active {
+  color: #fff;
+  background-color: #3940a4;
+}

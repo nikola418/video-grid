@@ -1,8 +1,9 @@
-import { Category, getAll } from "@/api/categories";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "../input";
+import Modal from "../modal/Modal";
+import { Categories } from "./categories";
 import styles from "./Navbar.module.css";
-import { Select } from "../select";
+import { FilterIcon } from "../filter-icon";
 
 type Props = {
   search?: string;
@@ -17,41 +18,51 @@ const Navbar: React.FC<Props> = ({
   selectedCategory,
   setSelectedCategory,
 }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  useEffect(() => {
-    const getCategories = async () => {
-      const categories = await getAll();
-      setCategories(categories);
-    };
-
-    getCategories();
-  }, []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [category, setCategory] = useState<string>(selectedCategory ?? "any");
 
   return (
-    <nav className={styles.navbar}>
-      <Input
-        type="search"
-        name="search"
-        id="search"
-        placeholder="Search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <Select
-        value={selectedCategory}
-        onChange={(e) => {
-          setSelectedCategory(e.target.value);
-        }}
-        defaultValue={""}
+    <>
+      <nav className={styles.navbar}>
+        <div className="row" style={{ maxWidth: "300px" }}>
+          <Input
+            type="search"
+            name="search"
+            id="search"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button
+            onClick={() => setIsModalOpen(true)}
+            style={{ verticalAlign: "middle" }}
+          >
+            <FilterIcon />
+          </button>
+        </div>
+      </nav>
+      <Modal
+        isOpen={isModalOpen}
+        close={() => setIsModalOpen(false)}
+        title="Filter"
       >
-        <option value="">Any</option>
-        {categories?.map((category) => (
-          <option key={category.id} value={category.slug}>
-            {category.name}
-          </option>
-        ))}
-      </Select>
-    </nav>
+        <Categories setCategory={setCategory} active={category} />
+        <div
+          className="row justify-content-center"
+          style={{ margin: "24px 0 0 0" }}
+        >
+          <button
+            onClick={() => {
+              setSelectedCategory(category);
+              setIsModalOpen(false);
+            }}
+            className={styles.button}
+          >
+            Confirm
+          </button>
+        </div>
+      </Modal>
+    </>
   );
 };
 

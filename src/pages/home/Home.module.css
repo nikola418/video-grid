@@ -6,4 +6,10 @@
 
 .main {
   flex: 1 auto;
+  background: linear-gradient(
+    90deg,
+    rgba(13, 10, 47, 0.202) 0%,
+    rgba(13, 10, 47, 0.202) 30%,
+    rgba(13, 10, 47, 0.202) 0%
+  );
 }

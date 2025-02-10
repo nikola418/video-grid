@@ -1,0 +1,29 @@
+.backdrop {
+  z-index: 800;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.435);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  border-radius: var(--sm-border-radius);
+  border: unset;
+  z-index: 999;
+  padding: var(--sm-padding);
+  max-width: 70%;
+  box-shadow: 0 0 1px 1px #333;
+}
+
+.header {
+  padding: 0 var(--sm-padding);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var (--sm-padding);
+}
