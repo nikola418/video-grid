@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import style from "./Video.module.css";
 import "./Video.module.css";
 
 export type Props = {
@@ -25,12 +26,13 @@ const Video: React.FC<Props> = ({ url }) => {
           videoRef.current.currentTime = 0;
         }
       }}
+      onLoadStart={(e) => console.log("loading")}
       ref={videoRef}
       width="100%"
       height="100%"
-      style={{ objectFit: "contain", display: "block" }}
       preload="none"
       poster="/bbb.jpg"
+      className={style.video}
       playsInline
       loop
       muted

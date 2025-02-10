@@ -39,25 +39,18 @@ const Navbar: React.FC<Props> = ({
       />
       <Select
         value={selectedCategory}
-        onChange={(e) => setSelectedCategory(e.target.value)}
-        defaultValue={"category"}
+        onChange={(e) => {
+          setSelectedCategory(e.target.value);
+        }}
+        defaultValue={""}
       >
-        <option value="category" hidden>
-          Category
-        </option>
+        <option value="">Any</option>
         {categories?.map((category) => (
           <option key={category.id} value={category.slug}>
             {category.name}
           </option>
         ))}
       </Select>
-      {selectedCategory === undefined ? (
-        <button className={styles.button}>&#xf0b0;</button>
-      ) : (
-        <button className={styles.button} onClick={() => setSelectedCategory()}>
-          x
-        </button>
-      )}
     </nav>
   );
 };

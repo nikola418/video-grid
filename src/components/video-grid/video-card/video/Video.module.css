@@ -1,3 +1,4 @@
-video.loading {
-  background: black url(/Untitled.png) center center no-repeat;
+.video {
+  object-fit: cover;
+  display: block;
 }

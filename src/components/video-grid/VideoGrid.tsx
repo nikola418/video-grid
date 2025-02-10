@@ -87,10 +87,20 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
                           props.visibleColumnStopIndex,
                       })
                     }
-                    columnCount={4}
+                    columnCount={
+                      width < 768 ? 1 : width < 1024 ? 2 : width < 1480 ? 3 : 4
+                    }
                     rowCount={itemCount / 4}
-                    columnWidth={width / 4}
-                    rowHeight={height / 3}
+                    columnWidth={
+                      width < 768
+                        ? width
+                        : width < 1024
+                        ? width / 2
+                        : width < 1480
+                        ? width / 3
+                        : width / 4
+                    }
+                    rowHeight={300}
                     height={height}
                     width={width}
                   >
@@ -99,7 +109,15 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
                       if (videoIndex >= videoInfos.length) return null;
 
                       return (
-                        <div style={{ ...style, padding: "24px" }}>
+                        <div
+                          style={{
+                            ...style,
+                            left: style.left + 12,
+                            top: style.top + 12,
+                            width: style.width - 24,
+                            height: style.height - 24,
+                          }}
+                        >
                           <VideoCard info={videoInfos[videoIndex]} />
                         </div>
                       );
@@ -111,6 +129,7 @@ const VideoGrid: React.FC<Props> = ({ search, selectedCategory }) => {
           </InfiniteLoader>
         )}
       </AutoSizer>
+      {isLoading === true && <div>Loading ...</div>}
     </Fragment>
   );
 };

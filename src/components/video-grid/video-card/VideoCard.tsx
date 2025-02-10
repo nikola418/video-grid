@@ -11,14 +11,8 @@ const VideoCard: React.FC<Props> = ({ info }) => {
     <div className={styles.videoCard}>
       <div className={styles.video}>
         <Video url={info.url} />
-      </div>
-      <div className={styles.tagline}>
-        <h4>{info.title}</h4>
-        <div className={styles.info}>
-          <p>
-            <i>{info.desc}</i>
-          </p>
-          <p>{new Date(info.createdAt.toString()).toUTCString()}</p>
+        <div className={styles.tagline}>
+          <h4>{info.title}</h4>
         </div>
       </div>
     </div>
