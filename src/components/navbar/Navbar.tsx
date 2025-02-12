@@ -1,5 +1,6 @@
 import { useFilters } from "@/contexts";
-import React, { useState } from "react";
+import { debounce } from "lodash";
+import React, { useEffect, useRef, useState } from "react";
 import { FilterIcon } from "../filter-icon";
 import { Input } from "../input";
 import Modal from "../modal/Modal";
@@ -8,16 +9,28 @@ import styles from "./Navbar.module.css";
 
 const Navbar: React.FC = () => {
   const {
-    search,
     setSearch,
     category: selectedCategory,
     setCategory: setSelectedCategory,
   } = useFilters();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [category, setCategory] = useState<string | undefined>(
     selectedCategory
   );
+  const [input, setInput] = useState<string>();
+  const debouncedSearch = useRef(
+    debounce((value?: string) => {
+      setSearch(value);
+    }, 500)
+  ).current;
+
+  useEffect(() => {
+    debouncedSearch(input);
+
+    return () => {
+      return debouncedSearch.cancel();
+    };
+  }, [debouncedSearch, input]);
 
   return (
     <>
@@ -28,8 +41,10 @@ const Navbar: React.FC = () => {
             name="search"
             id="search"
             placeholder="Search"
-            value={search ?? ""}
-            onChange={(e) => setSearch(e.target.value)}
+            value={input ?? ""}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
           />
           <button
             onClick={() => setIsModalOpen(true)}

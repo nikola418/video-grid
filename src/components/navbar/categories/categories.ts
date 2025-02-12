@@ -7,7 +7,7 @@ export type Category =
   | "Any";
 
 export const categories: Record<Category, string | undefined> = {
-  Any: undefined,
+  Any: "any",
   Art: "art",
   Nature: "nature",
   Science: "science",

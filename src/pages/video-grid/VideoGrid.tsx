@@ -3,74 +3,87 @@ import { getAll as searchAll } from "@/api/search-videos";
 import { VideoCard } from "@/components/video-card";
 import { useFilters } from "@/contexts";
 import { AxiosError } from "axios";
-import { debounce, unionBy } from "lodash";
+import { isUndefined, unionBy } from "lodash";
 import { Video as VideoType } from "pexels";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
+import { aspectRatio, calculateColumnCount, perColumn } from "./video-grid";
 
-const perPage = 12;
-
-const columnCount = (width: number) =>
-  width < 768 ? 1 : width < 1024 ? 2 : width < 1480 ? 3 : 4;
-const columnWidth = (width: number) =>
-  width < 768
-    ? width
-    : width < 1024
-    ? width / 2
-    : width < 1480
-    ? width / 3
-    : width / 4;
+type State = {
+  hasNext: boolean;
+  videoInfos: VideoType[];
+  isLoading: boolean;
+};
 
 const VideoGrid: React.FC = () => {
   const { search, category } = useFilters();
-  const [videoInfos, setVideoInfos] = useState<VideoType[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasNext, setHasNext] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [{ hasNext, isLoading, videoInfos }, setState] = useState<State>({
+    hasNext: true,
+    isLoading: false,
+    videoInfos: [],
+  });
+  const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+  const gridRef = useRef<FixedSizeGrid>(null);
+  const hasMountedRef = useRef(false);
 
   const searchVideos = useCallback(
-    async (page: number, search?: string, category?: string) => {
-      const { videos, next_page } = await searchAll({
-        query: `${category ?? ""},${search ?? ""}`,
+    async (
+      page: number,
+      perPage: number,
+      search?: string,
+      category?: string
+    ) => {
+      let query = "";
+      query = query.concat(category ?? "", search ? `,${search}` : "");
+
+      const { videos, next_page, total_results } = await searchAll({
+        query,
         page,
         per_page: perPage,
       });
 
-      setVideoInfos((prev) => unionBy(prev, videos, "id"));
+      setState((prev) => ({
+        ...prev,
+        videoInfos: unionBy(prev.videoInfos, videos, "id"),
+        hasNext: next_page ? true : false,
+      }));
 
-      if (next_page) setHasNext(true);
-      else setHasNext(false);
+      return { videos, total_results };
     },
     []
   );
 
-  const getPopular = useCallback(async (page: number) => {
-    const { videos, next_page } = await popularAll({
+  const getPopular = useCallback(async (page: number, perPage: number) => {
+    const { videos, next_page, total_results } = await popularAll({
       page,
       per_page: perPage,
     });
 
-    setVideoInfos((prev) => unionBy(prev, videos, "id"));
+    setState((prev) => ({
+      ...prev,
+      videoInfos: unionBy(prev.videoInfos, videos, "id"),
+      hasNext: next_page ? true : false,
+    }));
 
-    if (next_page) setHasNext(true);
-    else setHasNext(false);
+    return { videos, total_results };
   }, []);
 
-  const loadVideos = useCallback(() => {
-    const isSearch = search !== undefined && search !== "";
-    const isCategory = category !== undefined && category !== "";
+  const loadVideos = useCallback(
+    async (page: number, perPage: number) => {
+      if (isLoading) return;
 
-    const debounced = debounce(async () => {
-      setIsLoading(true);
+      const isSearch = !isUndefined(search) && search !== "";
+      const isCategory = !isUndefined(category) && category !== "any";
+
+      setState((prev) => ({ ...prev, isLoading: true }));
       try {
-        if (isSearch || isCategory) {
-          await searchVideos(page, search, category);
-        } else {
-          await getPopular(page);
-        }
+        const { total_results } =
+          isSearch || isCategory
+            ? await searchVideos(page, perPage, search, category)
+            : await getPopular(page, perPage);
       } catch (error) {
         console.error(error);
         if (error instanceof AxiosError) {
@@ -79,85 +92,108 @@ const VideoGrid: React.FC = () => {
           });
         }
       } finally {
-        setIsLoading(false);
+        setState((prev) => ({ ...prev, isLoading: false }));
       }
-    }, 500);
-
-    debounced();
-  }, [category, getPopular, page, search, searchVideos]);
-
-  useEffect(() => {
-    loadVideos();
-  }, [loadVideos]);
+    },
+    [category, getPopular, isLoading, search, searchVideos]
+  );
 
   useEffect(() => {
-    setPage(1);
-    setVideoInfos([]);
+    setState((prev) => ({
+      ...prev,
+      videoInfos: [],
+      hasNext: true,
+    }));
+    infiniteLoaderRef.current?.resetloadMoreItemsCache(true);
+    gridRef.current?.scrollTo({ scrollTop: 0 });
+    hasMountedRef.current = true;
   }, [search, category]);
 
-  const itemCount = hasNext ? videoInfos.length + perPage : videoInfos.length;
   const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
 
   return (
-    <Fragment>
+    <>
       <AutoSizer>
-        {({ height, width }) => (
-          <InfiniteLoader
-            itemCount={itemCount}
-            isItemLoaded={isItemLoaded}
-            loadMoreItems={
-              isLoading ? () => {} : () => setPage((prev) => prev + 1)
-            }
-          >
-            {({ onItemsRendered, ref }) => {
-              return (
-                <div>
-                  <FixedSizeGrid
-                    ref={ref}
-                    onItemsRendered={(props) => {
-                      onItemsRendered({
-                        overscanStartIndex:
-                          props.overscanRowStartIndex * 4 +
-                          props.overscanColumnStartIndex,
-                        overscanStopIndex:
-                          props.overscanRowStopIndex * 4 +
-                          props.overscanColumnStopIndex,
-                        visibleStartIndex:
-                          props.visibleRowStartIndex * 4 +
-                          props.visibleColumnStartIndex,
-                        visibleStopIndex:
-                          props.visibleRowStopIndex * 4 +
-                          props.visibleColumnStopIndex,
-                      });
-                    }}
-                    columnCount={columnCount(width)}
-                    rowCount={itemCount / columnCount(width)}
-                    columnWidth={columnWidth(width)}
-                    rowHeight={320}
-                    height={height}
-                    width={width}
-                  >
-                    {({ columnIndex, rowIndex, style }) => {
-                      const videoIndex =
-                        rowIndex * columnCount(width) + columnIndex;
+        {({ height, width }) => {
+          const columnCount = calculateColumnCount(width);
+          const columnWidth = width / columnCount;
+          const gutterSize = (16 * columnCount) / 2;
+          const itemCount = hasNext
+            ? videoInfos.length + columnCount * perColumn
+            : videoInfos.length;
 
-                      return (
-                        <VideoCard
-                          style={style}
-                          isItemLoaded={isItemLoaded(videoIndex)}
-                          video={videoInfos[videoIndex]}
-                          index={videoIndex}
-                        />
-                      );
-                    }}
-                  </FixedSizeGrid>
-                </div>
-              );
-            }}
-          </InfiniteLoader>
-        )}
+          return (
+            <InfiniteLoader
+              ref={infiniteLoaderRef}
+              itemCount={itemCount}
+              isItemLoaded={(index) => {
+                console.log(isItemLoaded(index));
+                return isItemLoaded(index);
+              }}
+              loadMoreItems={(start) => {
+                loadVideos(
+                  Math.floor(start / (perColumn * columnCount)) + 1,
+                  perColumn * columnCount
+                );
+              }}
+            >
+              {({ onItemsRendered, ref }) => {
+                return (
+                  <div>
+                    <FixedSizeGrid
+                      ref={(node) => {
+                        ref(node);
+                        gridRef.current = node;
+                      }}
+                      onItemsRendered={(props) => {
+                        onItemsRendered({
+                          overscanStartIndex:
+                            props.overscanRowStartIndex * columnCount +
+                            props.overscanColumnStartIndex,
+                          overscanStopIndex:
+                            props.overscanRowStopIndex * columnCount +
+                            props.overscanColumnStopIndex,
+                          visibleStartIndex:
+                            props.visibleRowStartIndex * columnCount +
+                            props.visibleColumnStartIndex,
+                          visibleStopIndex:
+                            props.visibleRowStopIndex * columnCount +
+                            props.visibleColumnStopIndex,
+                        });
+                      }}
+                      columnCount={columnCount}
+                      rowCount={itemCount / columnCount}
+                      columnWidth={columnWidth}
+                      rowHeight={columnWidth / aspectRatio}
+                      height={height}
+                      width={width}
+                    >
+                      {({ columnIndex, rowIndex, style }) => {
+                        const videoIndex = rowIndex * columnCount + columnIndex;
+
+                        return (
+                          <VideoCard
+                            style={{
+                              ...style,
+                              left: (style?.left as number) + gutterSize,
+                              top: (style?.top as number) + gutterSize,
+                              width: (style?.width as number) - 2 * gutterSize,
+                              height:
+                                (style?.height as number) - 2 * gutterSize,
+                            }}
+                            video={videoInfos[videoIndex]}
+                          />
+                        );
+                      }}
+                    </FixedSizeGrid>
+                  </div>
+                );
+              }}
+            </InfiniteLoader>
+          );
+        }}
       </AutoSizer>
-    </Fragment>
+    </>
   );
 };
 
