@@ -1,25 +1,23 @@
+import { useFilters } from "@/contexts";
 import React, { useState } from "react";
+import { FilterIcon } from "../filter-icon";
 import { Input } from "../input";
 import Modal from "../modal/Modal";
 import { Categories } from "./categories";
 import styles from "./Navbar.module.css";
-import { FilterIcon } from "../filter-icon";
 
-type Props = {
-  search?: string;
-  setSearch: (value: string) => void;
-  selectedCategory?: string;
-  setSelectedCategory: (value?: string) => void;
-};
+const Navbar: React.FC = () => {
+  const {
+    search,
+    setSearch,
+    category: selectedCategory,
+    setCategory: setSelectedCategory,
+  } = useFilters();
 
-const Navbar: React.FC<Props> = ({
-  search,
-  setSearch,
-  selectedCategory,
-  setSelectedCategory,
-}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [category, setCategory] = useState<string>(selectedCategory ?? "any");
+  const [category, setCategory] = useState<string | undefined>(
+    selectedCategory
+  );
 
   return (
     <>
@@ -30,7 +28,7 @@ const Navbar: React.FC<Props> = ({
             name="search"
             id="search"
             placeholder="Search"
-            value={search}
+            value={search ?? ""}
             onChange={(e) => setSearch(e.target.value)}
           />
           <button

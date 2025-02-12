@@ -10,20 +10,20 @@ const FilterIcon = () => {
       <path
         d="M3 5H21"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <path
         d="M6 12H18"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <path
         d="M10 19H14"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );

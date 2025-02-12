@@ -1,17 +1,15 @@
 import { getAll as popularAll } from "@/api/popular-videos";
 import { getAll as searchAll } from "@/api/search-videos";
-import { debounce, DebouncedFunc, unionBy } from "lodash";
+import { VideoCard } from "@/components/video-card";
+import { useFilters } from "@/contexts";
+import { AxiosError } from "axios";
+import { debounce, unionBy } from "lodash";
 import { Video as VideoType } from "pexels";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
-import { VideoCard } from "./video-card";
-
-type Props = {
-  search?: string;
-  selectedCategory?: string;
-};
 
 const perPage = 12;
 
@@ -26,59 +24,76 @@ const columnWidth = (width: number) =>
     ? width / 3
     : width / 4;
 
-const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
+const VideoGrid: React.FC = () => {
+  const { search, category } = useFilters();
   const [videoInfos, setVideoInfos] = useState<VideoType[]>([]);
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const lastDebounced = useRef<DebouncedFunc<() => Promise<void>> | null>(null);
 
-  const getVideoInfos = useCallback(
-    async (perPage: number) => {
-      setIsLoading(true);
-      const debounced = debounce(async () => {
-        const isSearch = search !== undefined && search !== "";
-        const isCategory =
-          selectedCategory !== undefined && selectedCategory !== "";
+  const searchVideos = useCallback(
+    async (page: number, search?: string, category?: string) => {
+      const { videos, next_page } = await searchAll({
+        query: `${category ?? ""},${search ?? ""}`,
+        page,
+        per_page: perPage,
+      });
 
-        try {
-          const { videos, next_page } =
-            isSearch || isCategory
-              ? await searchAll({
-                  query: selectedCategory ?? search,
-                  page,
-                  per_page: perPage,
-                })
-              : await popularAll({
-                  page,
-                  per_page: perPage,
-                });
+      setVideoInfos((prev) => unionBy(prev, videos, "id"));
 
-          setVideoInfos((prev) => unionBy(prev, videos, "id"));
-
-          if (next_page) setHasNext(true);
-          else setHasNext(false);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsLoading(false);
-        }
-      }, 500);
-      lastDebounced.current?.cancel();
-      lastDebounced.current = debounced;
-      debounced();
+      if (next_page) setHasNext(true);
+      else setHasNext(false);
     },
-
-    [page, search, selectedCategory]
+    []
   );
 
-  useEffect(() => {
-    getVideoInfos(perPage);
-  }, [getVideoInfos]);
+  const getPopular = useCallback(async (page: number) => {
+    const { videos, next_page } = await popularAll({
+      page,
+      per_page: perPage,
+    });
+
+    setVideoInfos((prev) => unionBy(prev, videos, "id"));
+
+    if (next_page) setHasNext(true);
+    else setHasNext(false);
+  }, []);
+
+  const loadVideos = useCallback(() => {
+    const isSearch = search !== undefined && search !== "";
+    const isCategory = category !== undefined && category !== "";
+
+    const debounced = debounce(async () => {
+      setIsLoading(true);
+      try {
+        if (isSearch || isCategory) {
+          await searchVideos(page, search, category);
+        } else {
+          await getPopular(page);
+        }
+      } catch (error) {
+        console.error(error);
+        if (error instanceof AxiosError) {
+          toast.error("Too many requests!", {
+            toastId: 429,
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500);
+
+    debounced();
+  }, [category, getPopular, page, search, searchVideos]);
 
   useEffect(() => {
+    loadVideos();
+  }, [loadVideos]);
+
+  useEffect(() => {
+    setPage(1);
     setVideoInfos([]);
-  }, [search, selectedCategory]);
+  }, [search, category]);
 
   const itemCount = hasNext ? videoInfos.length + perPage : videoInfos.length;
   const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
@@ -91,11 +106,7 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
             itemCount={itemCount}
             isItemLoaded={isItemLoaded}
             loadMoreItems={
-              isLoading
-                ? () => {}
-                : () => {
-                    setPage((prev) => prev + 1);
-                  }
+              isLoading ? () => {} : () => setPage((prev) => prev + 1)
             }
           >
             {({ onItemsRendered, ref }) => {
@@ -103,7 +114,7 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
                 <div>
                   <FixedSizeGrid
                     ref={ref}
-                    onItemsRendered={(props) =>
+                    onItemsRendered={(props) => {
                       onItemsRendered({
                         overscanStartIndex:
                           props.overscanRowStartIndex * 4 +
@@ -117,23 +128,25 @@ const VideoGrid: React.FC<Props> = ({ selectedCategory, search }) => {
                         visibleStopIndex:
                           props.visibleRowStopIndex * 4 +
                           props.visibleColumnStopIndex,
-                      })
-                    }
+                      });
+                    }}
                     columnCount={columnCount(width)}
-                    rowCount={itemCount / 4}
+                    rowCount={itemCount / columnCount(width)}
                     columnWidth={columnWidth(width)}
                     rowHeight={320}
                     height={height}
                     width={width}
                   >
                     {({ columnIndex, rowIndex, style }) => {
-                      const videoIndex = rowIndex * 4 + columnIndex;
+                      const videoIndex =
+                        rowIndex * columnCount(width) + columnIndex;
 
                       return (
                         <VideoCard
                           style={style}
                           isItemLoaded={isItemLoaded(videoIndex)}
                           video={videoInfos[videoIndex]}
+                          index={videoIndex}
                         />
                       );
                     }}

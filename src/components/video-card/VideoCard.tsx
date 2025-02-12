@@ -7,9 +7,10 @@ type Props = {
   isItemLoaded: boolean;
   video: VideoType;
   style: React.HTMLAttributes<HTMLDivElement>["style"];
+  index: number;
 };
 
-const VideoCard: React.FC<Props> = ({ isItemLoaded, style, video }) => {
+const VideoCard: React.FC<Props> = ({ isItemLoaded, style, video, index }) => {
   return (
     <div
       style={{
@@ -35,7 +36,7 @@ const VideoCard: React.FC<Props> = ({ isItemLoaded, style, video }) => {
             <div
               className={`row justify-content-space-between ${styles.tagline}`}
             >
-              <p style={{ margin: "6px" }}>Title</p>
+              <p style={{ margin: "6px" }}>Title&nbsp;{index}</p>
               <p style={{ margin: "6px" }}>{video.duration}s</p>
             </div>
           </>

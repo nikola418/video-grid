@@ -13,8 +13,8 @@ const CloseIcon = () => {
         x2="20"
         y2="20"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <line
         x1="20"
@@ -22,8 +22,8 @@ const CloseIcon = () => {
         x2="4"
         y2="20"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );

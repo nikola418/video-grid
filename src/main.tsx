@@ -1,10 +1,23 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes } from "react-router";
+import { FiltersProvider } from "./contexts";
 import "./index.css";
-import App from "./App.tsx";
+import { HomeLayout } from "./layouts";
+import { VideoGrid } from "./pages";
 
-createRoot(document.getElementById("root")!).render(
+const root = document.getElementById("root");
+
+createRoot(root!).render(
   <StrictMode>
-    <App />
+    <FiltersProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<HomeLayout />}>
+            <Route path="*" index element={<VideoGrid />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </FiltersProvider>
   </StrictMode>
 );
