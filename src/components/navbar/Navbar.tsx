@@ -1,6 +1,6 @@
 import { useFilters } from "@/contexts";
 import { debounce } from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FilterIcon } from "../filter-icon";
 import { Input } from "../input";
 import Modal from "../modal/Modal";
@@ -24,14 +24,6 @@ const Navbar: React.FC = () => {
     }, 500)
   ).current;
 
-  useEffect(() => {
-    debouncedSearch(input);
-
-    return () => {
-      return debouncedSearch.cancel();
-    };
-  }, [debouncedSearch, input]);
-
   return (
     <>
       <nav className={styles.navbar}>
@@ -44,6 +36,8 @@ const Navbar: React.FC = () => {
             value={input ?? ""}
             onChange={(e) => {
               setInput(e.target.value);
+              debouncedSearch.cancel();
+              debouncedSearch(e.target.value);
             }}
           />
           <button

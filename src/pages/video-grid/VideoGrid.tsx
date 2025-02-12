@@ -1,5 +1,3 @@
-import { getAll as popularAll } from "@/api/popular-videos";
-import { getAll as searchAll } from "@/api/search-videos";
 import { VideoCard } from "@/components/video-card";
 import { useFilters } from "@/contexts";
 import { AxiosError } from "axios";
@@ -10,7 +8,13 @@ import { toast } from "react-toastify";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
-import { aspectRatio, calculateColumnCount, perColumn } from "./video-grid";
+import {
+  aspectRatio,
+  calculateColumnCount,
+  getPopular,
+  perColumn,
+  searchVideos,
+} from "./video-grid";
 
 type State = {
   hasNext: boolean;
@@ -32,44 +36,13 @@ const VideoGrid: React.FC = () => {
   const gridRef = useRef<FixedSizeGrid>(null);
   const hasMountedRef = useRef(false);
 
-  const searchVideos = useCallback(
-    async (
-      page: number,
-      perPage: number,
-      search?: string,
-      category?: string
-    ) => {
-      let query = "";
-      query = query.concat(category ?? "", search ? `,${search}` : "");
-
-      const result = await searchAll({
-        query,
-        page,
-        per_page: perPage,
-      });
-
-      return result;
-    },
-    []
-  );
-
-  const getPopular = useCallback(async (page: number, perPage: number) => {
-    const result = await popularAll({
-      page,
-      per_page: perPage,
-    });
-
-    return result;
-  }, []);
-
   const loadVideos = useCallback(
     async (page: number, perPage: number) => {
-      if (isLoading) return;
+      setState((prev) => ({ ...prev, isLoading: true }));
 
       const isSearch = !isUndefined(search) && search !== "";
       const isCategory = !isUndefined(category) && category !== "any";
 
-      setState((prev) => ({ ...prev, isLoading: true }));
       try {
         const { next_page, videos } =
           isSearch || isCategory
@@ -82,18 +55,31 @@ const VideoGrid: React.FC = () => {
           hasNext: next_page ? true : false,
         }));
       } catch (error) {
-        console.error(error);
-        if (error instanceof AxiosError) {
+        if (error instanceof AxiosError && error.status) {
+          console.log(error.status);
           toast.error("Too many requests!", {
             toastId: 429,
           });
+        } else {
+          console.error(error);
         }
       } finally {
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     },
-    [category, getPopular, isLoading, search, searchVideos]
+    [category, search]
   );
+
+  useEffect(() => {
+    if (hasMountedRef.current) {
+      setState((prev) => ({
+        ...prev,
+        hasNext: true,
+        videoInfos: [],
+        resetCount: prev.resetCount + 1,
+      }));
+    }
+  }, [search, category]);
 
   useEffect(() => {
     if (hasMountedRef.current) {
@@ -102,17 +88,9 @@ const VideoGrid: React.FC = () => {
         gridRef.current?.scrollTo({ scrollTop: 0 });
       }
     }
+
     hasMountedRef.current = true;
   }, [resetCount]);
-
-  useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      hasNext: true,
-      videoInfos: [],
-      resetCount: prev.resetCount + 1,
-    }));
-  }, [search, category]);
 
   const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
 
@@ -131,16 +109,16 @@ const VideoGrid: React.FC = () => {
             <InfiniteLoader
               ref={infiniteLoaderRef}
               itemCount={itemCount}
-              isItemLoaded={(index) => {
-                console.log(isItemLoaded(index));
-                return isItemLoaded(index);
-              }}
-              loadMoreItems={(start) => {
-                loadVideos(
-                  Math.floor(start / (perColumn * columnCount)) + 1,
-                  perColumn * columnCount
-                );
-              }}
+              isItemLoaded={(index) => isItemLoaded(index)}
+              loadMoreItems={
+                isLoading
+                  ? () => {}
+                  : (start) =>
+                      loadVideos(
+                        Math.floor(start / (perColumn * columnCount)) + 1,
+                        perColumn * columnCount
+                      )
+              }
             >
               {({ onItemsRendered, ref }) => {
                 return (
@@ -166,7 +144,9 @@ const VideoGrid: React.FC = () => {
                             props.visibleColumnStopIndex,
                         });
                       }}
-                      columnCount={columnCount}
+                      columnCount={
+                        itemCount < columnCount ? itemCount : columnCount
+                      }
                       rowCount={itemCount / columnCount}
                       columnWidth={columnWidth}
                       rowHeight={columnWidth / aspectRatio}
