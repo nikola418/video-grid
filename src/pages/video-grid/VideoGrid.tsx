@@ -16,15 +16,18 @@ type State = {
   hasNext: boolean;
   videoInfos: VideoType[];
   isLoading: boolean;
+  resetCount: number;
 };
 
 const VideoGrid: React.FC = () => {
   const { search, category } = useFilters();
-  const [{ hasNext, isLoading, videoInfos }, setState] = useState<State>({
-    hasNext: true,
-    isLoading: false,
-    videoInfos: [],
-  });
+  const [{ hasNext, isLoading, videoInfos, resetCount }, setState] =
+    useState<State>({
+      hasNext: true,
+      isLoading: false,
+      videoInfos: [],
+      resetCount: 0,
+    });
   const infiniteLoaderRef = useRef<InfiniteLoader>(null);
   const gridRef = useRef<FixedSizeGrid>(null);
   const hasMountedRef = useRef(false);
@@ -39,36 +42,24 @@ const VideoGrid: React.FC = () => {
       let query = "";
       query = query.concat(category ?? "", search ? `,${search}` : "");
 
-      const { videos, next_page, total_results } = await searchAll({
+      const result = await searchAll({
         query,
         page,
         per_page: perPage,
       });
 
-      setState((prev) => ({
-        ...prev,
-        videoInfos: unionBy(prev.videoInfos, videos, "id"),
-        hasNext: next_page ? true : false,
-      }));
-
-      return { videos, total_results };
+      return result;
     },
     []
   );
 
   const getPopular = useCallback(async (page: number, perPage: number) => {
-    const { videos, next_page, total_results } = await popularAll({
+    const result = await popularAll({
       page,
       per_page: perPage,
     });
 
-    setState((prev) => ({
-      ...prev,
-      videoInfos: unionBy(prev.videoInfos, videos, "id"),
-      hasNext: next_page ? true : false,
-    }));
-
-    return { videos, total_results };
+    return result;
   }, []);
 
   const loadVideos = useCallback(
@@ -80,10 +71,16 @@ const VideoGrid: React.FC = () => {
 
       setState((prev) => ({ ...prev, isLoading: true }));
       try {
-        const { total_results } =
+        const { next_page, videos } =
           isSearch || isCategory
             ? await searchVideos(page, perPage, search, category)
             : await getPopular(page, perPage);
+
+        setState((prev) => ({
+          ...prev,
+          videoInfos: unionBy(prev.videoInfos, videos, "id"),
+          hasNext: next_page ? true : false,
+        }));
       } catch (error) {
         console.error(error);
         if (error instanceof AxiosError) {
@@ -99,14 +96,22 @@ const VideoGrid: React.FC = () => {
   );
 
   useEffect(() => {
+    if (hasMountedRef.current) {
+      if (infiniteLoaderRef.current) {
+        infiniteLoaderRef.current.resetloadMoreItemsCache(true);
+        gridRef.current?.scrollTo({ scrollTop: 0 });
+      }
+    }
+    hasMountedRef.current = true;
+  }, [resetCount]);
+
+  useEffect(() => {
     setState((prev) => ({
       ...prev,
-      videoInfos: [],
       hasNext: true,
+      videoInfos: [],
+      resetCount: prev.resetCount + 1,
     }));
-    infiniteLoaderRef.current?.resetloadMoreItemsCache(true);
-    gridRef.current?.scrollTo({ scrollTop: 0 });
-    hasMountedRef.current = true;
   }, [search, category]);
 
   const isItemLoaded = (index: number) => !hasNext || index < videoInfos.length;
