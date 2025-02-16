@@ -1,9 +1,7 @@
-import { Spinner } from "@/components/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { first } from "lodash";
 import { Video as VideoType } from "pexels";
 import { useRef, useState } from "react";
-import "./Video.module.css";
-import styles from "./Video.module.css";
 
 export type Props = {
   video: VideoType;
@@ -40,7 +38,7 @@ const Video: React.FC<Props> = ({ video }) => {
           videoRef.current.currentTime = 0;
         }
       }}
-      className={styles.container}
+      className="relative h-full w-full"
     >
       <video
         ref={videoRef}
@@ -48,7 +46,7 @@ const Video: React.FC<Props> = ({ video }) => {
         height="100%"
         preload="none"
         poster={videoPicture}
-        className={styles.video}
+        className="block object-cover"
         playsInline
         loop
         muted
@@ -57,7 +55,7 @@ const Video: React.FC<Props> = ({ video }) => {
         Your browser does not support the video tag.
       </video>
       {
-        <div className={styles.spinnerContainer}>
+        <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
           {isVideoLoading === true && <Spinner />}
         </div>
       }

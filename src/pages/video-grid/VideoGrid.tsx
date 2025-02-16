@@ -41,7 +41,7 @@ const VideoGrid: React.FC = () => {
       setState((prev) => ({ ...prev, isLoading: true }));
 
       const isSearch = !isUndefined(search) && search !== "";
-      const isCategory = !isUndefined(category) && category !== "any";
+      const isCategory = !isUndefined(category);
 
       try {
         const { next_page, videos } =
@@ -67,7 +67,7 @@ const VideoGrid: React.FC = () => {
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     },
-    [category, search]
+    [category, search],
   );
 
   useEffect(() => {
@@ -118,11 +118,11 @@ const VideoGrid: React.FC = () => {
                         start,
                         stop,
                         Math.floor(start / (perColumn * columnCount)) + 1,
-                        perColumn * columnCount
+                        perColumn * columnCount,
                       );
                       loadVideos(
                         Math.floor(start / (perColumn * columnCount)) + 1,
-                        perColumn * columnCount
+                        perColumn * columnCount,
                       );
                     }
               }

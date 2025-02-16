@@ -11,7 +11,7 @@ export const searchVideos = async (
   page: number,
   perPage: number,
   search?: string,
-  category?: string
+  category?: string,
 ) => {
   let query = "";
   query = query.concat(category ?? "", search ? `,${search}` : "");

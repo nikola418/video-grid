@@ -1,13 +1,12 @@
 import { Navbar } from "@/components";
 import { Outlet } from "react-router";
-import styles from "./HomeLayout.module.css";
 import { ToastContainer } from "react-toastify";
 
 const HomeLayout = () => {
   return (
-    <div className={styles.page}>
+    <div className="flex min-h-[100vh] min-w-sm flex-col">
       <Navbar />
-      <main className={styles.main}>
+      <main className="flex-auto">
         <Outlet />
       </main>
       <ToastContainer
