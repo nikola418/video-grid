@@ -2,10 +2,10 @@ import { useFilters } from "@/contexts";
 import { debounce } from "lodash";
 import React, { useRef, useState } from "react";
 import { FilterIcon } from "../filter-icon";
-import { Input } from "../input";
 import Modal from "../modal/Modal";
 import { Categories } from "./categories";
 import styles from "./Navbar.module.css";
+import { Input } from "../ui/input";
 
 const Navbar: React.FC = () => {
   const {
