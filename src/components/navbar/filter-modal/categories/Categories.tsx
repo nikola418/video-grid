@@ -10,7 +10,7 @@ const Categories: React.FC<Props> = ({ active, setActive }) => {
   const commonClassNames: (
     value?: string,
   ) => React.HTMLAttributes<HTMLDivElement>["className"] = (value) =>
-    `m-2 w-40 cursor-pointer rounded-md border border-gray-500 p-2 hover:bg-gray-700 ${
+    `m-2 w-40 cursor-pointer rounded-md border border-gray-500 p-2 hover:bg-gray-700 dark:hover:bg-blue-700 ${
       isEqual(active, value) ? "bg-blue-500  text-white" : ""
     }`;
 

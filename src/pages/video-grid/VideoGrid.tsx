@@ -159,6 +159,7 @@ const VideoGrid: React.FC = () => {
                       rowHeight={columnWidth / aspectRatio}
                       height={height}
                       width={width}
+                      className="dark:bg-gradient-to-b dark:from-slate-600 dark:to-slate-800"
                     >
                       {({ columnIndex, rowIndex, style }) => {
                         const videoIndex = rowIndex * columnCount + columnIndex;

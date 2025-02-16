@@ -1,11 +1,11 @@
-import filterIcon from "@/assets/icons/filter.svg";
+import FilterSVG from "@/assets/icons/filter.svg?react";
+import { Modal } from "@/components";
 import { useFilters } from "@/contexts";
 import { debounce } from "lodash";
 import React, { useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { FiltersModal } from "./filter-modal";
-import { Modal } from "@/components";
 
 const Navbar: React.FC = () => {
   const { setSearch } = useFilters();
@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-10 flex w-full items-center justify-start gap-2 bg-linear-to-r from-cyan-500 to-blue-500 p-2 shadow-sm shadow-slate-500">
+      <nav className="sticky top-0 z-10 flex w-full items-center justify-start gap-2 p-2 shadow-sm shadow-slate-700/50 dark:bg-gradient-to-r dark:from-slate-600 dark:to-slate-800">
         <Input
           type="search"
           name="search"
@@ -35,9 +35,9 @@ const Navbar: React.FC = () => {
         />
         <Button
           onClick={() => modalRef.current?.showModal()}
-          className="bg-transparent"
+          className="bg-none"
         >
-          <img src={filterIcon} alt="Filter" />
+          <FilterSVG />
         </Button>
       </nav>
       <Modal ref={modalRef} title="Filter">

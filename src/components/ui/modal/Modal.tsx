@@ -1,7 +1,7 @@
-import closeIcon from "@/assets/icons/close.svg";
 import React from "react";
 import { Button } from "../button";
 import { closeOnBackdrop } from "./close-on-backdrop";
+import CloseSVG from "@/assets/icons/close.svg?react";
 
 type Props = {
   ref: React.RefObject<HTMLDialogElement | null>;
@@ -12,7 +12,7 @@ const Modal: React.FC<Props> = ({ children, ref, title }) => {
   return (
     <dialog
       ref={ref}
-      className="top-[50%] left-[50%] z-50 max-w-[80%] translate-[-50%] transform p-2 backdrop:bg-black/50"
+      className="top-[50%] left-[50%] z-50 max-w-[80%] translate-[-50%] transform p-2 backdrop:bg-black/50 dark:bg-slate-700 dark:text-white"
       onClick={(e) => {
         if (ref.current) {
           closeOnBackdrop(e, ref.current);
@@ -21,8 +21,8 @@ const Modal: React.FC<Props> = ({ children, ref, title }) => {
     >
       <div className="flex justify-between">
         <h3 className="text-2xl">{title}</h3>
-        <Button onClick={() => ref.current?.close()} className="bg-transparent">
-          <img src={closeIcon} alt="Close" />
+        <Button onClick={() => ref.current?.close()} className="bg-none">
+          <CloseSVG />
         </Button>
       </div>
       {children}
