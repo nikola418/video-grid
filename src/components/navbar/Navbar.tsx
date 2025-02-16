@@ -37,7 +37,7 @@ const Navbar: React.FC = () => {
           onClick={() => modalRef.current?.showModal()}
           className="bg-none"
         >
-          <FilterSVG />
+          <FilterSVG className="text-black dark:text-white" />
         </Button>
       </nav>
       <Modal ref={modalRef} title="Filter">

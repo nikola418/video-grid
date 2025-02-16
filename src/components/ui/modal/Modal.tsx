@@ -1,7 +1,7 @@
+import CloseSVG from "@/assets/icons/close.svg?react";
 import React from "react";
 import { Button } from "../button";
 import { closeOnBackdrop } from "./close-on-backdrop";
-import CloseSVG from "@/assets/icons/close.svg?react";
 
 type Props = {
   ref: React.RefObject<HTMLDialogElement | null>;
@@ -22,7 +22,7 @@ const Modal: React.FC<Props> = ({ children, ref, title }) => {
       <div className="flex justify-between">
         <h3 className="text-2xl">{title}</h3>
         <Button onClick={() => ref.current?.close()} className="bg-none">
-          <CloseSVG />
+          <CloseSVG className="text-black dark:text-white" />
         </Button>
       </div>
       {children}

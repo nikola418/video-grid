@@ -113,13 +113,7 @@ const VideoGrid: React.FC = () => {
               loadMoreItems={
                 isLoading
                   ? () => {}
-                  : (start, stop) => {
-                      console.log(
-                        start,
-                        stop,
-                        Math.floor(start / (perColumn * columnCount)) + 1,
-                        perColumn * columnCount,
-                      );
+                  : (start) => {
                       loadVideos(
                         Math.floor(start / (perColumn * columnCount)) + 1,
                         perColumn * columnCount,
