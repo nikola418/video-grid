@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-10 flex w-full items-center justify-start gap-2 p-2 shadow-sm shadow-slate-700/50 dark:bg-gradient-to-r dark:from-slate-600 dark:to-slate-800">
+      <nav className="sticky top-0 z-10 flex w-full items-center justify-start gap-2 p-2 shadow-sm shadow-slate-700/50 dark:bg-gradient-to-r dark:from-slate-800 dark:to-slate-950">
         <Input
           type="search"
           name="search"
