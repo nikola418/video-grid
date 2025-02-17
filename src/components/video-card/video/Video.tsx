@@ -38,15 +38,13 @@ const Video: React.FC<Props> = ({ video }) => {
           videoRef.current.currentTime = 0;
         }
       }}
-      className="relative h-full w-full"
+      className="relative size-full"
     >
       <video
         ref={videoRef}
-        width="100%"
-        height="100%"
         preload="none"
         poster={videoPicture}
-        className="block object-cover"
+        className="block aspect-video size-full object-cover"
         playsInline
         loop
         muted

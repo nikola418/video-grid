@@ -6,7 +6,7 @@ const HomeLayout = () => {
   return (
     <div className="flex min-h-[100vh] min-w-sm flex-col">
       <Navbar />
-      <main className="flex-auto">
+      <main className="flex-auto dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-950">
         <Outlet />
       </main>
       <ToastContainer
