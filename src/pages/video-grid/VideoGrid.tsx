@@ -1,7 +1,7 @@
 import { VideoCard } from "@/components/video-card";
 import { useFilters } from "@/contexts";
 import { AxiosError } from "axios";
-import { isUndefined, unionBy } from "lodash";
+import { first, isUndefined, unionBy } from "lodash";
 import { Video as VideoType } from "pexels";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -15,6 +15,7 @@ import {
   perColumn,
   searchVideos,
 } from "./video-grid";
+import { Spinner } from "@/components";
 
 type State = {
   hasNext: boolean;
@@ -157,6 +158,14 @@ const VideoGrid: React.FC = () => {
                       {({ columnIndex, rowIndex, style }) => {
                         const videoIndex = rowIndex * columnCount + columnIndex;
 
+                        const video = videoInfos[videoIndex];
+                        if (!video) {
+                          return (
+                            <div className="flex size-full items-center justify-center">
+                              <Spinner />
+                            </div>
+                          );
+                        }
                         return (
                           <VideoCard
                             style={{
@@ -167,7 +176,10 @@ const VideoGrid: React.FC = () => {
                               height:
                                 (style?.height as number) - 2 * gutterSize,
                             }}
-                            video={videoInfos[videoIndex]}
+                            id={video.id}
+                            videoFile={first(video.video_files)}
+                            videoPicture={first(video.video_pictures)}
+                            duration={video.duration}
                           />
                         );
                       }}

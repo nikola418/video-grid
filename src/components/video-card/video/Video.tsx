@@ -1,16 +1,19 @@
 import { Spinner } from "@/components/ui/spinner";
-import { first } from "lodash";
 import { Video as VideoType } from "pexels";
 import { useRef, useState } from "react";
 
 export type Props = {
-  video: VideoType;
+  videoFile?: VideoType["video_files"][0];
+  videoPicture?: string;
+  preload?: React.MediaHTMLAttributes<HTMLVideoElement>["preload"];
 };
 
-const Video: React.FC<Props> = ({ video }) => {
+const Video: React.FC<Props> = ({
+  videoFile,
+  videoPicture,
+  preload = "none",
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const videoFile = first(video.video_files);
-  const videoPicture = video.image;
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
@@ -42,7 +45,7 @@ const Video: React.FC<Props> = ({ video }) => {
     >
       <video
         ref={videoRef}
-        preload="none"
+        preload={preload}
         poster={videoPicture}
         className="block aspect-video size-full object-cover"
         playsInline
